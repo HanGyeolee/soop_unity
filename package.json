@@ -1,6 +1,6 @@
 {
   "name": "com.soop.extension",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "displayName": "SOOP Extension",
   "description": "SOOP Live Streaming API Library for Unity\n\n# Dependencies\n- NativeWebSocket : https://github.com/endel/NativeWebSocket.git#upm",
   "unity": "2022.3",
