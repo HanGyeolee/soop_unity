@@ -183,7 +183,7 @@ namespace SoopExtension
 
         private ChatType ParseMessageType(string packet)
         {
-            if (packet.Length < 6 || packet[0] != (char)ChatDelimiter.STARTER)
+            if (packet.Length < 6 || !packet.StartsWith(ChatDelimiter.STARTER))
                 throw new Exception("Invalid packet format");
 
             var typeStr = packet.Substring(2, 4);
@@ -195,7 +195,7 @@ namespace SoopExtension
 
         private void ProcessMessage(ChatType messageType, string packet, string receivedTime)
         {
-            var parts = packet.Split((char)ChatDelimiter.SEPARATOR);
+            var parts = packet.Split(ChatDelimiter.SEPARATOR);
 
             switch (messageType)
             {
@@ -222,6 +222,13 @@ namespace SoopExtension
                         synAck = parts.Length > 7 ? parts[7] : ""
                     };
                     EmitEvent(SoopChatEvent.ENTER_CHAT_ROOM, enterResponse);
+
+                    // 로그인된 경우 ENTER_INFO 패킷 전송
+                    if (cookie?.AuthTicket != null)
+                    {
+                        var enterInfoPacket = GetEnterInfoPacket(enterResponse.synAck);
+                        websocket.Send(enterInfoPacket);
+                    }
                     isEntered = true;
                     StartPingInterval();
                     break;
@@ -369,7 +376,7 @@ namespace SoopExtension
                 yield return new WaitForSeconds(60f);
                 if (websocket != null && websocket.State == WebSocketState.Open)
                 {
-                    var pingPacket = GetPacket(ChatType.PING, ((char)ChatDelimiter.SEPARATOR).ToString());
+                    var pingPacket = GetPacket(ChatType.PING, (ChatDelimiter.SEPARATOR).ToString());
                     websocket.Send(Encoding.UTF8.GetBytes(pingPacket));
                 }
             }
@@ -382,37 +389,76 @@ namespace SoopExtension
 
         private byte[] GetConnectPacket()
         {
-            string payload = $"{(char)ChatDelimiter.SEPARATOR}{(char)ChatDelimiter.SEPARATOR}{(char)ChatDelimiter.SEPARATOR}16{(char)ChatDelimiter.SEPARATOR}";
+            string payload = $"{ChatDelimiter.SEPARATOR}{ChatDelimiter.SEPARATOR}{ChatDelimiter.SEPARATOR}16{ChatDelimiter.SEPARATOR}";
             if (cookie?.AuthTicket != null)
             {
-                payload = $"{(char)ChatDelimiter.SEPARATOR}{cookie.AuthTicket}{(char)ChatDelimiter.SEPARATOR}{(char)ChatDelimiter.SEPARATOR}16{(char)ChatDelimiter.SEPARATOR}";
+                payload = $"{ChatDelimiter.SEPARATOR}{cookie.AuthTicket}{ChatDelimiter.SEPARATOR}{ChatDelimiter.SEPARATOR}16{ChatDelimiter.SEPARATOR}";
             }
             return Encoding.UTF8.GetBytes(GetPacket(ChatType.CONNECT, payload));
         }
 
         private byte[] GetJoinPacket()
         {
-            string payload = $"{(char)ChatDelimiter.SEPARATOR}{liveDetail.CHANNEL.CHATNO}";
+            string payload = $"{ChatDelimiter.SEPARATOR}{liveDetail.CHANNEL.CHATNO}";
 
             if (cookie != null)
             {
-                payload += $"{(char)ChatDelimiter.SEPARATOR}{liveDetail.CHANNEL.FTK}";
-                payload += $"{(char)ChatDelimiter.SEPARATOR}0{(char)ChatDelimiter.SEPARATOR}";
-                payload += $"{(char)ChatDelimiter.SEPARATOR}";
+                payload += $"{ChatDelimiter.SEPARATOR}{liveDetail.CHANNEL.FTK}";
+                payload += $"{ChatDelimiter.SEPARATOR}0{ChatDelimiter.SEPARATOR}";
+
+                // TypeScript 원본과 동일한 로그 정보 생성
+                var logData = new Dictionary<string, object>
+                {
+                    {"set_bps", liveDetail.CHANNEL.BPS},
+                    {"view_bps", liveDetail.CHANNEL.VIEWPRESET[0].bps},
+                    {"quality", "normal"},
+                    {"uuid", cookie._au},
+                    {"geo_cc", liveDetail.CHANNEL.geo_cc},
+                    {"geo_rc", liveDetail.CHANNEL.geo_rc},
+                    {"acpt_lang", liveDetail.CHANNEL.acpt_lang},
+                    {"svc_lang", liveDetail.CHANNEL.svc_lang},
+                    {"subscribe", 0},
+                    {"lowlatency", 0},
+                    {"mode", "landing"}
+                };
+
+                string query = ObjectToQueryString(logData);
+                payload += $"log{ChatDelimiter.ELEMENT_START}{query}{ChatDelimiter.ELEMENT_END}";
+                payload += $"pwd{ChatDelimiter.ELEMENT_START}{ChatDelimiter.ELEMENT_END}";
+                payload += $"auth_info{ChatDelimiter.ELEMENT_START}NULL{ChatDelimiter.ELEMENT_END}";
+                payload += $"pver{ChatDelimiter.ELEMENT_START}2{ChatDelimiter.ELEMENT_END}";
+                payload += $"access_system{ChatDelimiter.ELEMENT_START}html5{ChatDelimiter.ELEMENT_END}";
+                payload += $"{ChatDelimiter.SEPARATOR}";
             }
             else
             {
                 for (int i = 0; i < 5; i++)
-                    payload += (char)ChatDelimiter.SEPARATOR;
+                    payload += ChatDelimiter.SEPARATOR;
             }
 
             return Encoding.UTF8.GetBytes(GetPacket(ChatType.ENTER_CHAT_ROOM, payload));
         }
 
+        private string ObjectToQueryString(Dictionary<string, object> obj)
+        {
+            var result = "";
+            foreach (var kvp in obj)
+            {
+                result += $"{ChatDelimiter.SPACE}&{ChatDelimiter.SPACE}{kvp.Key}{ChatDelimiter.SPACE}={ChatDelimiter.SPACE}{kvp.Value}";
+            }
+            return result;
+        }
+
         private string GetPacket(ChatType chatType, string payload)
         {
-            var packetHeader = $"{(char)ChatDelimiter.STARTER}{((int)chatType):D4}{GetPayloadLength(payload):D6}00";
+            var packetHeader = $"{ChatDelimiter.STARTER}{((int)chatType):D4}{GetPayloadLength(payload):D6}00";
             return packetHeader + payload;
+        }
+
+        private byte[] GetEnterInfoPacket(string synAck)
+        {
+            string payload = $"{ChatDelimiter.SEPARATOR}{synAck}{ChatDelimiter.SEPARATOR}0{ChatDelimiter.SEPARATOR}";
+            return Encoding.UTF8.GetBytes(GetPacket(ChatType.ENTER_INFO, payload));
         }
 
         private int GetPayloadLength(string payload)

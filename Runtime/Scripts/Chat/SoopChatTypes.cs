@@ -2,13 +2,13 @@ using System;
 
 namespace SoopExtension
 {
-    public enum ChatDelimiter : byte
+    public static class ChatDelimiter
     {
-        STARTER = 0x1b,     // \x1b
-        SEPARATOR = 0x0c,   // \x0c
-        ELEMENT_START = 0x11, // \x11
-        ELEMENT_END = 0x12,   // \x12
-        SPACE = 0x06        // \x06
+        public static readonly string STARTER = "\x1b\t";  // TypeScript 원본과 일치
+        public static readonly char SEPARATOR = '\x0c';
+        public static readonly char ELEMENT_START = '\x11';
+        public static readonly char ELEMENT_END = '\x12';
+        public static readonly char SPACE = '\x06';
     }
 
     public enum ChatType
@@ -24,8 +24,8 @@ namespace SoopExtension
         AD_BALLOON_DONATION = 87,
         SUBSCRIBE = 93,
         NOTIFICATION = 104,
-        EMOTICON = 109,
         VIDEO_DONATION = 105,
+        EMOTICON = 109,
         VIEWER = 127
     }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -34,6 +35,12 @@ namespace SoopExtension
     [Serializable]
     public class Station
     {
+        public Display display;
+        public Group[] groups;
+        public Menu[] menus;
+        public Upd upd;
+        public Vod[] vods;
+
         public string broad_start;
         public int grade;
         public string jointime;
@@ -44,6 +51,88 @@ namespace SoopExtension
         public string user_id;
         public string user_nick;
         public int active_no;
+    }
+
+
+    [Serializable]
+    public class Display
+    {
+        public string main_type;
+        public string title_type;
+        public string title_text;
+        public string profile_text;
+        public int skin_type;
+        public int skin_no;
+        public string title_skin_image;
+    }
+
+    [Serializable]
+    public class Group
+    {
+        public int idx;
+        public int group_no;
+        public int priority;
+        public GroupInfo info;
+    }
+
+    [Serializable]
+    public class GroupInfo
+    {
+        public string group_name;
+        public string group_class_name;
+        public string group_background_color;
+    }
+
+    [Serializable]
+    public class Menu
+    {
+        public int bbs_no;
+        public int station_no;
+        public int auth_no;
+        public int w_auth_no;
+        public int display_type;
+        public int rnum;
+        public int line;
+        public int indention;
+        public string name;
+        public int name_font;
+        public int main_view_yn;
+        public int view_type;
+    }
+
+    [Serializable]
+    public class Upd
+    {
+        public int station_no;
+        public string user_id;
+        public int asp_code;
+        public int fan_cnt;
+        public int today0_visit_cnt;
+        public int today1_visit_cnt;
+        public int total_visit_cnt;
+        public int today0_ok_cnt;
+        public int today1_ok_cnt;
+        public int today0_fav_cnt;
+        public int today1_fav_cnt;
+        public int total_ok_cnt;
+        public int total_view_cnt;
+    }
+
+    [Serializable]
+    public class Vod
+    {
+        public int bbs_no;
+        public int station_no;
+        public int auth_no;
+        public int w_auth_no;
+        public int display_type;
+        public int rnum;
+        public int line;
+        public int indention;
+        public string name;
+        public int name_font;
+        public int main_view_yn;
+        public int view_type;
     }
 
     [Serializable]

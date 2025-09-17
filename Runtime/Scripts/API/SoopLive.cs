@@ -63,6 +63,7 @@ namespace SoopExtension
         public int PCON;
         public int PCON_TIME;
         public string[] PCON_MONTH;
+        public object[] PCON_OBJECT;
         public string FTK;
         public bool BPCBANNER;
         public bool BPCCHATPOPBANNER;
@@ -71,10 +72,35 @@ namespace SoopExtension
         public bool BPCLOADINGBANNER;
         public string BPCPOSTROLL;
         public string BPCPREROLL;
+        public Midroll MIDROLL; // 추가된 구조체
+        public string PREROLLTAG;
+        public string MIDROLLTAG;
+        public string POSTROLLTAG;
+        public bool BJAWARD;
+        public bool BJAWARDWATERMARK;
+        public string BJAWARDYEAR;
+        public bool GEM;
+        public bool GEM_LOG;
+        public string[] CLEAR_MODE_CATE;
+        public string PLAYTIMINGBUFFER_DURATION;
+        public string STREAMER_PLAYTIMINGBUFFER_DURATION;
+        public string MAXBUFFER_DURATION;
+        public string LOWBUFFER_DURATION;
+        public string PLAYBACKRATEDELTA;
+        public string MAXOVERSEEKDURATION;
+
         public string TIER1_NICK;
         public string TIER2_NICK;
         public int EXPOSE_FLAG;
         public int SUB_PAY_CNT;
+    }
+
+    [Serializable]
+    public class Midroll
+    {
+        public string VALUE;
+        public int OFFSET_START_TIME;
+        public int OFFSET_END_TIME;
     }
 
     [Serializable]
@@ -152,7 +178,9 @@ namespace SoopExtension
 
                 try
                 {
-                    var liveDetail = JsonUtility.FromJson<LiveDetail>($"{{\"CHANNEL\":{request.downloadHandler.text}}}");
+                    var responseText = request.downloadHandler.text;
+                    var channel = JsonUtility.FromJson<Channel>(responseText);
+                    var liveDetail = new LiveDetail { CHANNEL = channel };
                     onSuccess?.Invoke(liveDetail);
                 }
                 catch (Exception ex)
