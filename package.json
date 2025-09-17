@@ -1,12 +1,13 @@
 {
-  "name": "com.soop.extension",
+  "name": "com.hangyeolee.soop_extension",
   "version": "0.1.0",
   "displayName": "SOOP Extension",
   "description": "SOOP Live Streaming API Library for Unity\n\n# Dependencies\n- NativeWebSocket : https://github.com/endel/NativeWebSocket.git#upm",
   "unity": "2022.3",
   "author": {
-    "name": "ChoiHanGyeol",
-    "email": "hangoil65@gmail.com"
+    "name": "HanGyeolee",
+    "email": "hangoil65@gmail.com",
+    "url": "https://github.com/HanGyeolee/soop_unity"
   },
   "keywords": [
     "soop",
