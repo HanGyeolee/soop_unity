@@ -1,11 +1,15 @@
 {
-    "name": "SoopExtension.Tests",
-    "rootNamespace": "SoopExtension.Tests",
+    "name": "SoopExtension.Tests.Editor",
+    "rootNamespace": "SoopExtension.Tests.Editor",
     "references": [
         "UnityEngine.TestRunner",
-        "SoopExtension.Runtime"
+        "UnityEditor.TestRunner",
+        "SoopExtension.Runtime",
+        "SoopExtension.Editor"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
