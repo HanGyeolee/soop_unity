@@ -2,6 +2,15 @@
 
 Unity용 SOOP(숲) 라이브 스트리밍 플랫폼 API 라이브러리입니다.
 
+## 종속성
+이 패키지는 다음 종속성을 자동으로 설치합니다:
+- **NativeWebSocket**: 웹소켓 라이브러리
+
+자동 설치에 실패하면 수동으로 설치하세요:
+1. 패키지 관리자 열기
+2. '+' > git URL에서 패키지 추가하기를 클릭합니다
+3. 입력: 'https://github.com/endel/NativeWebSocket.git#upm'
+
 ## ✨ 주요 기능
 
 - **인증 API**: 로그인 및 쿠키 관리

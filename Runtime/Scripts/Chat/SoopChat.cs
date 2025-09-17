@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.WebSockets;
 using System.Text;
 using NativeWebSocket;
 using UnityEngine;
@@ -104,6 +103,9 @@ namespace SoopExtension
 
             isConnected = false;
             isEntered = false;
+
+            // SoopClient에서 이 인스턴스 제거
+            client.RemoveChatInstance(this);
         }
 
         private System.Threading.Tasks.Task GetCookieAsync()
@@ -416,6 +418,16 @@ namespace SoopExtension
         private int GetPayloadLength(string payload)
         {
             return Encoding.UTF8.GetByteCount(payload);
+        }
+
+        public void ProcessMessages()
+        {
+#if !UNITY_WEBGL || UNITY_EDITOR
+            if (websocket != null)
+            {
+                websocket.DispatchMessageQueue();
+            }
+#endif
         }
     }
 }

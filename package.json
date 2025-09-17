@@ -18,11 +18,17 @@
   "dependencies": {
     "com.unity.modules.unitywebrequest": "1.0.0",
     "com.unity.modules.jsonserialize": "1.0.0",
-    "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#upm"
+    "com.endel.nativewebsocket": "1.1.5"
   },
-  "gitDependencies": {
-    "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#upm"
-  },
+  "scopedRegistries": [
+    {
+      "name": "GitHub Packages",
+      "url": "https://npm.pkg.github.com/endel",
+      "scopes": [
+        "com.endel"
+      ]
+    }
+  ],
   "samples": [
     {
       "displayName": "SOOP Basic Usage",

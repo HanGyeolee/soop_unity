@@ -11,7 +11,7 @@ namespace SoopExtension
     {
         public readonly SoopClientOptions Options;
 
-        // API ¸ğµâµé
+        // API ëª¨ë“ˆë“¤
         public SoopAuth Auth { get; private set; }
         public SoopLive Live { get; private set; }
         public SoopChannel Channel { get; private set; }
@@ -31,13 +31,17 @@ namespace SoopExtension
             }
         }
 
+        // í™œì„±í™”ëœ ì±„íŒ… ì¸ìŠ¤í„´ìŠ¤ë“¤ ì¶”ì 
+        private readonly List<SoopChat> activeChatInstances = new List<SoopChat>();
+
+
         public SoopClient() : this(new SoopClientOptions()) { }
 
         public SoopClient(SoopClientOptions options)
         {
             Options = options ?? new SoopClientOptions();
 
-            // ±âº»°ª ¼³Á¤
+            // ê¸°ë³¸ê°’ ì„¤ì •
             if (Options.baseUrls == null)
                 Options.baseUrls = SoopConstants.DEFAULT_BASE_URLS;
 
@@ -63,13 +67,13 @@ namespace SoopExtension
 
         private void InitializeAPIModules()
         {
-            // API ¸ğµâ ÃÊ±âÈ­
+            // API ëª¨ë“ˆ ì´ˆê¸°í™”
             Auth = new SoopAuth(this);
             Live = new SoopLive(this);
             Channel = new SoopChannel(this);
         }
 
-        // HTTP ¿äÃ»À» À§ÇÑ ±âº» ¸Ş¼­µå
+        // HTTP ìš”ì²­ì„ ìœ„í•œ ê¸°ë³¸ ë©”ì„œë“œ
         public void SendWebRequest(string url, System.Action<string> onSuccess, System.Action<string> onError,
             string method = "GET", string postData = null, Dictionary<string, string> headers = null)
         {
@@ -84,7 +88,7 @@ namespace SoopExtension
             string errorMessage = "";
             string resultText = "";
 
-            // try-catch¸¦ yield return ¹Û¿¡¼­ Ã³¸®
+            // try-catchë¥¼ yield return ë°–ì—ì„œ ì²˜ë¦¬
             try
             {
                 if (method.ToUpper() == "GET")
@@ -93,7 +97,7 @@ namespace SoopExtension
                 }
                 else if (method.ToUpper() == "POST")
                 {
-                    request = UnityWebRequest.Post(url, postData);
+                    request = UnityWebRequest.PostWwwForm(url, postData);
                 }
                 else
                 {
@@ -106,10 +110,10 @@ namespace SoopExtension
                     request.downloadHandler = new DownloadHandlerBuffer();
                 }
 
-                // ±âº» Çì´õ ¼³Á¤
+                // ê¸°ë³¸ í—¤ë” ì„¤ì •
                 request.SetRequestHeader("User-Agent", Options.userAgent);
 
-                // Ãß°¡ Çì´õ ¼³Á¤
+                // ì¶”ê°€ í—¤ë” ì„¤ì •
                 if (headers != null)
                 {
                     foreach (var header in headers)
@@ -124,17 +128,17 @@ namespace SoopExtension
                 errorMessage = $"Request setup failed: {ex.Message}";
             }
 
-            // ¿¡·¯°¡ ÀÖÀ¸¸é Áï½Ã ¹İÈ¯
+            // ì—ëŸ¬ê°€ ìˆìœ¼ë©´ ì¦‰ì‹œ ë°˜í™˜
             if (hasError)
             {
                 onError?.Invoke(errorMessage);
                 yield break;
             }
 
-            // ¿äÃ» ½ÇÇà
+            // ìš”ì²­ ì‹¤í–‰
             yield return request.SendWebRequest();
 
-            // °á°ú Ã³¸®
+            // ê²°ê³¼ ì²˜ë¦¬
             try
             {
                 if (request.result == UnityWebRequest.Result.Success)
@@ -157,7 +161,7 @@ namespace SoopExtension
                 request?.Dispose();
             }
 
-            // Äİ¹é È£Ãâ
+            // ì½œë°± í˜¸ì¶œ
             if (hasError)
             {
                 onError?.Invoke(errorMessage);
@@ -168,26 +172,40 @@ namespace SoopExtension
             }
         }
 
-        // Ã¤ÆÃ »ı¼º ¸Ş¼­µå
+        // ì±„íŒ… ìƒì„± ë©”ì„œë“œ
         public SoopChat CreateChat(SoopChatOptions options)
         {
             if (options.baseUrls == null)
                 options.baseUrls = Options.baseUrls;
 
-            return new SoopChat(this, options);
+            var chat = new SoopChat(this, options);
+            activeChatInstances.Add(chat);
+            return chat;
+        }
+
+        // ì±„íŒ… ì¸ìŠ¤í„´ìŠ¤ ì œê±° (SoopChatì—ì„œ í˜¸ì¶œ)
+        public void RemoveChatInstance(SoopChat chat)
+        {
+            activeChatInstances.Remove(chat);
         }
 
         private void Update()
         {
-            try
+#if !UNITY_WEBGL || UNITY_EDITOR
+            // ëª¨ë“  í™œì„±í™”ëœ SoopChatì˜ ë©”ì‹œì§€ ì²˜ë¦¬
+            for (int i = activeChatInstances.Count - 1; i >= 0; i--)
             {
-                // NativeWebSocketÀÇ ¸Ş½ÃÁö Ã³¸®¸¦ À§ÇØ ÇÊ¿ä
-                NativeWebSocket.WebSocket.DispatchMessageQueue();
+                if (activeChatInstances[i] != null)
+                {
+                    activeChatInstances[i].ProcessMessages();
+                }
+                else
+                {
+                    // null ì°¸ì¡° ì œê±°
+                    activeChatInstances.RemoveAt(i);
+                }
             }
-            catch (System.Exception)
-            {
-                // NativeWebSocketÀÌ ¾øÀ¸¸é ¹«½Ã
-            }
+#endif
         }
     }
 }
