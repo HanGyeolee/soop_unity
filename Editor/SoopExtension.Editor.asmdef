@@ -1,0 +1,18 @@
+{
+    "name": "SoopExtension.Editor",
+    "rootNamespace": "SoopExtension.Editor",
+    "references": [
+        "SoopExtension.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,21 @@
+{
+    "name": "SoopExtension.Runtime",
+    "rootNamespace": "SoopExtension",
+    "references": [
+        "endel.nativewebsocket"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.endel.nativewebsocket",
+            "expression": "1.1.5"
+        }
+    ],
+    "noEngineReferences": false
+}
